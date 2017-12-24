@@ -32,8 +32,8 @@ def create_test_data(conn, cursor):
     create_new_user(conn, "jsook724")
 
     for i in range(3):
-        create_new_user("user" + str(i))
-        users.append("user "+ str(i))
+        create_new_user(cursor, "user" + str(i))
+        users.append("user"+ str(i))
 
     for user in users:
         for i in range(10):
@@ -44,7 +44,7 @@ def create_test_data(conn, cursor):
         artists = get_user_artists(cursor, user)
         print ("User: " + user + "\nArtists:\n")
         for artist in artists:
-            print(artist[0] + "\tts: " + artist[1])
+            print(artist[0] + "\tts: " + str(artist[1]))
 
 
 
@@ -53,24 +53,24 @@ def create_test_data(conn, cursor):
 def create_new_user(cursor, username):
     if not user_exists(cursor, username):
 
-        results = cursor.execute("INSERT INTO User(name) VALUES(?)", (username))
+        results = cursor.execute("INSERT INTO User(name) VALUES(?)", (username,))
         conn.commit()
-        return cursor.lastrowid
+        return results.lastrowid
     else:
         return -1
 
 def user_exists(cursor, username):
-    results = cursor.execute("SELECT name FROM User WHERE name=?", (username))
-    row = cursor.fetchone()
+    results = cursor.execute("SELECT name FROM User WHERE name=?", (username,))
+    row = results.fetchone()
     if row is None:
         return False
     else:
         return True
 
 def get_user_id(cursor, username):
-    results = cursor.execute("SELECT id FROM User WHERE name=?", (username))
-    row = cursor.fetchone()
-    return row
+    results = cursor.execute("SELECT id FROM User WHERE name=?", (username,))
+    row = results.fetchone()
+    return row[0]
 
 def insert_artist(conn, cursor, username, artist, created):
     if (not user_exists(cursor, username)):
@@ -89,10 +89,10 @@ def get_user_artists(cursor, username):
         SELECT Artist.name, Artist.created FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
-            WHERE User.name = ?''' ,(username) )
+            WHERE User.name = ?''' ,(username,) )
 
     rows = cursor.fetchall()
     return rows
 
-init_tables(c)
+# init_tables(c)
 create_test_data(conn, c)
