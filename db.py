@@ -27,6 +27,13 @@ def init_tables(cursor):
             CONSTRAINT FKUserXArtist_artistId FOREIGN KEY (artist_id) REFERENCES Artist(id) )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE Alert (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username INT(11) NOT NULL,
+            artist INT(11) NOT NULL,
+            url varchar(400) NOT NULL)''')
+
 def create_test_data(conn, cursor):
     users = ["jsook724"]
     create_new_user(conn, "jsook724")
@@ -94,5 +101,42 @@ def get_user_artists(cursor, username):
     rows = cursor.fetchall()
     return rows
 
+def get_users(cursor):
+    results = cursor.execute('SELECT * FROM USER')
+    return results.fetchall()
+
+def user_has_artist(cursor, username, artist):
+    results = cursor.execute('''
+        SELECT count(*) FROM Artist
+            JOIN  UserXArtist ON artist_id = Artist.id
+            JOIN User ON user_id = User.id
+            WHERE User.name = ?
+            AND Artist.name = ?
+            ''', (username,artist)
+    )
+
+
+    row = results.fetchone()
+    if row[0] >= 1:
+        return True
+    else:
+        return False
+
+def alert_sent(cursor, username, artist, url):
+    results = cursor.execute('''
+      SELECT count(*) FROM Alert
+      WHERE username=?
+      AND artist=?
+      AND url=?
+      ''', (username,artist, url))
+    row = results.fetchone()
+    if row[0] == 0:
+        return False
+    else:
+        return True
+
+def create_new_alert_entry(conn, cursor, username, artist, url):
+    results = cursor.execute("INSERT INTO Alert(username, artist, url) VALUES(?, ?, ?)", (username,artist, url))
+    conn.commit()
 # init_tables(c)
-create_test_data(conn, c)
+# create_test_data(conn, c)
