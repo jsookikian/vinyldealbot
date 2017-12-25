@@ -20,6 +20,9 @@ def removeArtists(conn, cursor, comment):
         if user_has_artist(cursor, username, artist):
             remove_artist_from_user(conn, cursor, username, artist)
             logging.info("Removed " + artist + " from user " + username)
+            reply = "**VinylDealBot**\n\nYou will no longer receive alerts for:\n\n " + artist
+            comment.reply(reply)
+
 
 def getCommentString(artists):
     comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n "
