@@ -16,9 +16,10 @@ def removeArtists(conn, cursor, comment):
     artists = " ".join(comment.body.split()[2:])
     artists = [ x.lstrip() for x in artists.split(",")]
     username = comment.author.name
+    created = comment.created_utc
     for artist in artists:
-        if user_has_artist(cursor, username, artist):
-            remove_artist_from_user(conn, cursor, username, artist)
+        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
+            remove_artist_alert(conn, cursor, username, artist, created)
             logging.info("Removed " + artist + " from user " + username)
             reply = "**VinylDealBot**\n\nYou will no longer receive alerts for:\n\n " + artist
             comment.reply(reply)
@@ -44,7 +45,8 @@ def addArtists(conn, cursor, comment):
         create_new_user(conn, cursor, username)
     addedArtists = []
     for artist in artists:
-        if not user_has_artist(cursor, username, artist):
+        if not user_has_artist(cursor, username, artist) or (not artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist)):
+
             insert_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
 
@@ -56,8 +58,9 @@ def addArtists(conn, cursor, comment):
 def readPosts(conn, cursor):
     for submission in subreddit.hot(limit=50):
         for comment in submission.comments.list():
-            if re.search("VinylDealBot",comment.body, re.IGNORECASE):
-                if re.search("Remove", comment.body, re.IGNORECASE):
+            cmt = comment.body.split(" ")
+            if re.search("VinylDealBot",comment.body, re.IGNORECASE) and cmt[0] == "VinylDealBot":
+                if re.search("Remove", comment.body, re.IGNORECASE) and cmt[1]:
                     removeArtists(conn, cursor, comment)
                 else:
                     addArtists(conn, cursor, comment)
