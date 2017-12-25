@@ -84,6 +84,13 @@ def remove_artist_alert(conn, cursor, username, artist, created):
         results = cursor.execute("Update ARTIST SET Active=0, created= ? WHERE id=?", (created, artistid,))
         conn.commit()
 
+def update_artist(conn, cursor, username, artist, created):
+    if user_exists(cursor, username) and user_has_artist(cursor, username, artist):
+        userid = get_user_id(cursor, username)
+        artistid = get_artist_id(cursor, username, artist)
+        results = cursor.execute("Update ARTIST SET Active=1, created= ? WHERE id=?", (created, artistid,))
+        conn.commit()
+
 def create_new_user(conn, cursor, username):
     if not user_exists(cursor, username):
         results = cursor.execute("INSERT INTO User(name) VALUES(?)", (username,))

@@ -45,12 +45,16 @@ def addArtists(conn, cursor, comment):
         create_new_user(conn, cursor, username)
     addedArtists = []
     for artist in artists:
-        if not user_has_artist(cursor, username, artist) or (not artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist)):
-
+        if not user_has_artist(cursor, username, artist):
             insert_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
-
             logging.info(comment.author.name + " wants alerts for " + artist)
+
+        if (not artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist)):
+            update_artist(conn, cursor, username, artist, created)
+            addedArtists.append(artist)
+            logging.info(comment.author.name + " wants alerts for " + artist + " (update)")
+
     if (len(addedArtists) > 0):
         comment.reply(getCommentString(addedArtists))
         time.sleep(3)
