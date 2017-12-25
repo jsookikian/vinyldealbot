@@ -28,8 +28,8 @@ def getCommentString(artists):
     comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n "
     for artist in artists:
         comment +=  artist + "\n\n"
-    comment += "To get alerts, simply comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts simply comment ```VinylDealBot Remove [Artist | Album] \n\nSeparate multiple artists/albums with commas"
+    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
     return comment
 
 def addArtists(conn, cursor, comment):
@@ -55,7 +55,7 @@ def addArtists(conn, cursor, comment):
 
 def readPosts(conn, cursor):
     for submission in subreddit.hot(limit=50):
-        for comment in submission.comments:
+        for comment in submission.comments.list():
             if re.search("VinylDealBot",comment.body, re.IGNORECASE):
                 if re.search("Remove", comment.body, re.IGNORECASE):
                     removeArtists(conn, cursor, comment)
