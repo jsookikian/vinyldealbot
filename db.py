@@ -16,7 +16,8 @@ def init_tables(cursor):
         CREATE TABLE Artist (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name varchar(250) NOT NULL,
-            created TIMESTAMP NOT NULL )
+            created TIMESTAMP NOT NULL
+             )
     ''')
 
     cursor.execute('''
@@ -24,7 +25,9 @@ def init_tables(cursor):
             user_id INT(11),
             artist_id INT(11),
             CONSTRAINT FKUserXArtist_userId FOREIGN KEY (user_id) REFERENCES User(id),
-            CONSTRAINT FKUserXArtist_artistId FOREIGN KEY (artist_id) REFERENCES Artist(id) )
+            CONSTRAINT FKUserXArtist_artistId FOREIGN KEY (artist_id) REFERENCES Artist(id)
+
+            )
     ''')
 
     cursor.execute('''
@@ -53,11 +56,36 @@ def create_test_data(conn, cursor):
         for artist in artists:
             print(artist[0] + "\tts: " + str(artist[1]))
 
+def test_remove(conn, cursor):
+    users = ["jsook724"]
+    # create_new_user(conn, "jsook724")
+    artists = ["Steppenwolf"]
+    print ("adding steppenwolf")
+    ts = datetime.datetime.now().timestamp()
+    insert_artist(conn, cursor, users[0], "Steppenwolf", ts)
+
+    artists = get_user_artists(cursor, users[0])
+    print("User: " + users[0] + "\nArtists:\n")
+    for artist in artists:
+        print(artist[0] + "\tts: " + str(artist[1]))
+
+    remove_artist_from_user(conn, cursor, "jsook724", "Steppenwolf")
+    print ("Removing steppenwolf")
+    artists = get_user_artists(cursor, users[0])
+    print("User: " + users[0] + "\nArtists:\n")
+    for artist in artists:
+        print(artist[0] + "\tts: " + str(artist[1]))
 
 
+def remove_artist_from_user(conn, cursor, username, artist):
+    if user_exists(cursor, username) and user_has_artist(cursor, username, artist):
+        userid = get_user_id(cursor, username)
+        artistid =get_artist_id(cursor, username, artist)
+        results = cursor.execute("DELETE FROM ARTIST WHERE id=?", (artistid,))
+        results = cursor.execute("DELETE FROM UserXArtist WHERE user_id=? AND artist_id=?", (userid, artistid))
+        conn.commit()
 
-
-def create_new_user(cursor, username):
+def create_new_user(conn, cursor, username):
     if not user_exists(cursor, username):
 
         results = cursor.execute("INSERT INTO User(name) VALUES(?)", (username,))
@@ -78,6 +106,21 @@ def get_user_id(cursor, username):
     results = cursor.execute("SELECT id FROM User WHERE name=?", (username,))
     row = results.fetchone()
     return row[0]
+
+def get_artist_id(cursor, username, artist):
+    if user_has_artist(cursor, username, artist):
+        userid = get_user_id(cursor, username)
+        results = cursor.execute('''
+            SELECT Artist.id FROM User
+                JOIN  UserXArtist ON User.id = user_id
+                JOIN Artist ON Artist.id = artist_id
+                WHERE Artist.name = ?
+                AND User.name = ?''' ,(artist, username))
+
+        rows = cursor.fetchone()
+        artistid = rows[0]
+        return artistid
+
 
 def insert_artist(conn, cursor, username, artist, created):
     if (not user_exists(cursor, username)):
@@ -140,3 +183,4 @@ def create_new_alert_entry(conn, cursor, username, artist, url):
     conn.commit()
 # init_tables(c)
 # create_test_data(conn, c)
+# test_remove(conn, c)
