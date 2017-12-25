@@ -8,17 +8,7 @@ import logging
 from db import *
 conn = sqlite3.connect('alerts.db')
 c = conn.cursor()
-
-
-
-# # reddit = praw.Reddit('VinylDealBot')
-reddit = praw.Reddit(client_id='kMDo6xQ-K4bAFA',
-                     client_secret='DqcJud81ZEdCfPUb4D7eEim-wFc',
-                     password='4mV-6RV-tTm-zmu',
-                     user_agent='VinylAlert0.1',
-                     username='VinylDealBot')
-
-print(reddit.user.me())
+reddit = praw.Reddit('VinylDealBot')
 subreddit = reddit.subreddit("vinyldeals")
 
 
@@ -56,9 +46,9 @@ def addArtists(conn, cursor, comment):
             addedArtists.append(artist)
 
             logging.info(comment.author.name + " wants alerts for " + artist)
-    if (len(addedArtists) > 0):
+    # if (len(addedArtists) > 0):
         comment.reply(getCommentString(addedArtists))
-        time.sleep(3)
+        # time.sleep(3)
 
 def readPosts(conn, cursor):
     for submission in subreddit.hot(limit=50):
@@ -104,5 +94,5 @@ if __name__ == "__main__":
         logging.info("Reading posts")
         readPosts(conn, c)
         logging.info("Checking alerts")
-        alert(conn, c)
+        # alert(conn, c)
 
