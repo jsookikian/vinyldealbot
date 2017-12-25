@@ -49,9 +49,9 @@ def addArtists(conn, cursor, comment):
             addedArtists.append(artist)
 
             logging.info(comment.author.name + " wants alerts for " + artist)
-    # if (len(addedArtists) > 0):
+    if (len(addedArtists) > 0):
         comment.reply(getCommentString(addedArtists))
-        # time.sleep(3)
+        time.sleep(3)
 
 def readPosts(conn, cursor):
     for submission in subreddit.hot(limit=50):
