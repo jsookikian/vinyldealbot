@@ -104,5 +104,5 @@ if __name__ == "__main__":
         logging.info("Reading posts")
         readPosts(conn, c)
         logging.info("Checking alerts")
-        # alert(conn, c)
+        alert(conn, c)
 
