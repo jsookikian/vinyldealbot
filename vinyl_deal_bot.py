@@ -87,7 +87,7 @@ def alert(conn, cursor):
         for user in users:
             artists =  [artist[0] for artist in get_user_artists(c, user)]
             for artist in artists:
-                title = re.replace("(Lowest Price Ever", "", submission.title, count=1)
+                title = re.sub("(Lowest Price Ever", "", submission.title, count=1)
                 if re.search(artist, title, re.IGNORECASE):
                     if not alert_sent(cursor, user, artist, url):
                         template = get_template(artist, submission.title, url, permalink)
