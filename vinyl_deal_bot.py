@@ -27,14 +27,14 @@ def removeAllArtists(conn, cursor, comment):
 def showAlerts(conn, cursor, comment):
     username = comment.author.name
     created = comment.created_utc
-    if not user_exists(cursor, username) and not show_alert_sent(conn, cursor, username, created):
+    if user_exists(cursor, username) and not show_alert_sent(conn, cursor, username, created):
         artists = get_user_artists(cursor, username)
         create_new_show_alert_entry(conn, cursor, username, created)
         if (artists == -1):
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
             comment.reply(reply)
 
-        if len(artists) > 0:
+        elif len(artists) > 0:
 
             logging.info("Showing all alerts for user " + username)
 
