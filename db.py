@@ -168,12 +168,12 @@ def get_all_users_with_artist(cursor, artist):
             WHERE lower(Artist.name) = lower(?) AND Artist.active=1''' ,(artist,))
 
     rows = cursor.fetchall()
-    return rows
+    return [user[0] for user in rows]
 
 def get_all_artists(cursor):
     results = cursor.execute('SELECT DISTINCT Artist.name FROM Artist')
     rows = cursor.fetchall()
-    return rows
+    return [artist[0] for artist in rows]
 
 def get_users(cursor):
     results = cursor.execute('SELECT * FROM USER')
