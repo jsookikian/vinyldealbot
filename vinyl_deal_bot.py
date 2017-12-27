@@ -23,11 +23,11 @@ def removeAllArtists(conn, cursor, comment):
             removedArtists.append(artist)
         if len(removedArtists) > 0:
             logging.info("Removed all alerts for user " + username)
-            # comment.reply(getRemovedAllCommentString(removedArtists))
-            # time.sleep(3)
+            comment.reply(getRemovedAllCommentString(removedArtists))
+            time.sleep(3)
         else:
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-            # comment.reply(reply)
+            comment.reply(reply)
 
 def showAlerts(conn, cursor, comment):
     username = comment.author.name
