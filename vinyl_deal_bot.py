@@ -115,9 +115,9 @@ def readPosts(conn, cursor):
                 if re.search("Remove ", comment.body, re.IGNORECASE) and cmt[1].lower() == "remove":
                     removeArtists(conn, cursor, comment)
                 elif re.search("RemoveAll", comment.body, re.IGNORECASE) and cmt[1].lower() == "removeall":
-                    removeAllArtists()
+                    removeAllArtists(conn, cursor, comment)
                 elif re.search("ShowAlerts", comment.body, re.IGNORECASE) and cmt[1].lower() == "showalerts":
-                    showAlerts()
+                    showAlerts(conn, cursor, comment)
                 else:
                     addArtists(conn, cursor, comment)
 
@@ -139,7 +139,7 @@ def alert(conn, cursor):
         for user in users:
             artists =  [artist[0] for artist in get_user_artists(c, user)]
             for artist in artists:
-                title = submission.title.replace('Lowest Price Ever', '',1)
+                title = submission.title.replace('Lowest', '',1)
                 if re.search(artist, title, re.IGNORECASE):
                     if not alert_sent(cursor, user, artist, url):
                         template = get_template(artist, submission.title, url, permalink)
