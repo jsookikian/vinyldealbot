@@ -139,7 +139,7 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
 
 
 def alert(conn, cursor):
-    artists = get_all_artists(cursor)
+    artists = [ artist[0] for artist in get_all_artists(cursor)]
     # Iterate through all posts in the top 50 hot posts
     for submission in subreddit.hot(limit=50):
         title = submission.title.replace('Lowest', '', 1)
@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     while True:
         logging.info("Reading posts")
-        readPosts(conn, c)
+        # readPosts(conn, c)
         logging.info("Checking alerts")
         alert(conn, c)
 #
