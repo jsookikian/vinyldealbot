@@ -14,6 +14,7 @@ subreddit = reddit.subreddit("vinyldeals")
 def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
     artists = get_user_artists(cursor, username)
+    created = comment.created_utc
     removedArtists = []
     for artist,created in artists:
         if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
