@@ -229,7 +229,7 @@ def alert_sent(cursor, username, artist, url):
 
 def show_alert_sent(cursor, username, created):
     results = cursor.execute('''
-      SELECT count(*) FROM ShowAlert
+      SELECT count(*) FROM ShowAllAlert
       WHERE username=?
       AND created=?
       ''', (username,created))
