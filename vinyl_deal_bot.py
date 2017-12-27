@@ -1,11 +1,10 @@
 import praw
-import pdb
 import re
-import os
 import time
-import sqlite3
 import logging
 from db import *
+from commentstrings import *
+
 conn = sqlite3.connect('alerts.db')
 c = conn.cursor()
 reddit = praw.Reddit('VinylDealBot')
@@ -15,41 +14,35 @@ def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
     artists = get_user_artists(cursor, username)
     created = comment.created_utc
+    permalink = comment.permalink
     removedArtists = []
     for artist,created in artists:
-        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist):
+        if user_has_artist(cursor, username, artist) \
+                and artist_is_active(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             removedArtists.append(artist)
-    if not show_alert_sent(cursor, username, created):
-        create_new_show_alert_entry(conn, cursor, username, created)
         if len(removedArtists) > 0:
             logging.info("Removed all alerts for user " + username)
-            comment.reply(getRemovedAllCommentString(removedArtists))
-            time.sleep(3)
+            # comment.reply(getRemovedAllCommentString(removedArtists))
+            # time.sleep(3)
         else:
-
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-            comment.reply(reply)
+            # comment.reply(reply)
 
 def showAlerts(conn, cursor, comment):
     username = comment.author.name
     created = comment.created_utc
-    if user_exists(cursor, username) and not show_alert_sent(cursor, username, created):
+    permalink = comment.permalink
+    if user_exists(cursor, username):
         artists = get_user_artists(cursor, username)
-        create_new_show_alert_entry(conn, cursor, username, created)
-        if (artists == -1):
+        mark_comment_read(conn, cursor, username, permalink, created)
+        if artists == -1 or len(artists) <= 0:
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
             comment.reply(reply)
-
-        elif len(artists) > 0:
-
+        else:
             logging.info("Showing all alerts for user " + username)
-
             comment.reply(getShowAllCommentString(artists))
             time.sleep(3)
-        else:
-            reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-            comment.reply(reply)
 
 
 def removeArtists(conn, cursor, comment):
@@ -58,44 +51,15 @@ def removeArtists(conn, cursor, comment):
     username = comment.author.name
     created = comment.created_utc
     for artist in artists:
-        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
+        if user_has_artist(cursor, username, artist) \
+                and artist_is_active(conn, cursor, username, artist) \
+                and created > get_artist_timestamp(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             logging.info("Removed " + artist + " from user " + username)
     if len(artists) > 0:
         comment.reply(getRemoveArtistsCommentString(artists))
         time.sleep(3)
 
-def getCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n "
-    for artist in artists:
-        comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
-    return comment
-
-def getRemoveArtistsCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
-    for artist in artists:
-        comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
-    return comment
-
-def getRemovedAllCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
-    for artist in artists:
-        comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
-    return comment
-
-def getShowAllCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou are currently signed up for alerts on the following:\n\n "
-    for artist,created in artists:
-        comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
-    return comment
 
 def addArtists(conn, cursor, comment):
     # Get the artist name
@@ -114,7 +78,8 @@ def addArtists(conn, cursor, comment):
             addedArtists.append(artist)
             logging.info(comment.author.name + " wants alerts for " + artist)
 
-        if (not artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist)):
+        if not artist_is_active(conn, cursor, username, artist) \
+                and created > get_artist_timestamp(conn, cursor, username, artist):
             update_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
             logging.info(comment.author.name + " wants alerts for " + artist + " (update)")
@@ -123,45 +88,69 @@ def addArtists(conn, cursor, comment):
         comment.reply(getCommentString(addedArtists))
         time.sleep(3)
 
+def executeCommand(conn, cursor, comment, body):
+    if re.search("Remove ", comment.body, re.IGNORECASE) \
+            and body[1].lower() == "remove":
+        begin_execute = datetime.datetime.now()
+        removeArtists(conn, cursor, comment)
+        logging.info("Remove Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
+    elif re.search("RemoveAll", comment.body, re.IGNORECASE) \
+            and body[1].lower() == "removeall":
+        begin_execute = datetime.datetime.now()
+        removeAllArtists(conn, cursor, comment)
+        logging.info("Remove All Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
+
+    elif re.search("ShowAlerts", comment.body, re.IGNORECASE) \
+            and body[1].lower() == "showalerts":
+        begin_execute = datetime.datetime.now()
+        showAlerts(conn, cursor, comment)
+        logging.info("Show Alerts...time taken:\t" + str(datetime.datetime.now() - begin_execute))
+    else:
+        begin_execute = datetime.datetime.now()
+        addArtists(conn, cursor, comment)
+        logging.info("Add Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
+
 def readPosts(conn, cursor):
-    for submission in subreddit.hot(limit=50):
+    numComments = 0
+    start = datetime.datetime.now()
+    for submission in subreddit.hot(limit=200):
         for comment in submission.comments.list():
-            cmt = comment.body.split(" ")
-            if re.search("VinylDealBot",comment.body, re.IGNORECASE) and cmt[0] == "VinylDealBot":
-                if re.search("Remove ", comment.body, re.IGNORECASE) and cmt[1].lower() == "remove":
-                    removeArtists(conn, cursor, comment)
-                elif re.search("RemoveAll", comment.body, re.IGNORECASE) and cmt[1].lower() == "removeall":
-                    removeAllArtists(conn, cursor, comment)
-                elif re.search("ShowAlerts", comment.body, re.IGNORECASE) and cmt[1].lower() == "showalerts":
-                    showAlerts(conn, cursor, comment)
-                else:
-                    addArtists(conn, cursor, comment)
+            numComments += 1
+            if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]":
+                username = comment.author.name
+                permalink = comment.permalink
+                created = comment.created_utc
+                body = comment.body.split(" ")
+                if re.search("VinylDealBot",comment.body, re.IGNORECASE) \
+                        and body[0] == "VinylDealBot" \
+                        and not comment_has_been_read(cursor, username, permalink, created):
+                    mark_comment_read(conn, cursor, username, permalink, created)
+                    executeCommand(conn, cursor, comment, body)
+
+    end = datetime.datetime.now()
+    logging.info("Comments read: " + str(numComments) + "\tTime Taken: " + str(end - start) + "\tAverage Time(s): " + str((end - start).total_seconds() / numComments))
 
 
-def get_template(artist, title, url, permalink):
-    return '**VinylDealBot** on [r/VinylDeals](http://reddit.com/r/VinylDeals)\n\n' \
-            + "[" + title + "](" + permalink + ")\n\n" \
-            + url
-
-def send_alert(reddit, template, artist, username):
+def send_alert(conn, cursor, reddit, submission, artist, username):
+    template = get_template(artist, submission.title, submission.url, submission.permalink)
+    create_new_alert_entry(conn, cursor, username, artist, submission.url)
     reddit.redditor(username).message('VinylDealBot: ' + artist + " on sale",  template)
+    logging.info("Sent message to " + username + "for " + artist + "\n" + submission.title)
+
 
 def alert(conn, cursor):
-    users = [user[1] for user in get_users(c)]
-
+    artists = get_all_artists(cursor)
+    # Iterate through all posts in the top 50 hot posts
     for submission in subreddit.hot(limit=50):
-        url = submission.url
-        permalink = submission.permalink
-        for user in users:
-            artists =  [artist[0] for artist in get_user_artists(c, user)]
-            for artist in artists:
-                title = submission.title.replace('Lowest', '',1)
-                if re.search(artist, title, re.IGNORECASE):
-                    if not alert_sent(cursor, user, artist, url):
-                        template = get_template(artist, submission.title, url, permalink)
-                        send_alert(reddit, template, artist, user)
-                        create_new_alert_entry(conn, cursor, user, artist, url)
-                        logging.info("Sent message to " + user + "for " + artist + "\n" + submission.title)
+        title = submission.title.replace('Lowest', '', 1)
+        # check if an artist that a user wants alerts for is in the title
+        for artist in artists:
+            if re.search(artist, title, re.IGNORECASE):
+                users = get_all_users_with_artist(cursor, artist)
+                # send users alerts
+                for user in users:
+                    if alert_sent(cursor, user, artist, submission.url):
+                        send_alert(conn, cursor, reddit, submission, artist, user)
 
 if __name__ == "__main__":
     conn = sqlite3.connect('alerts.db')
@@ -174,4 +163,4 @@ if __name__ == "__main__":
         readPosts(conn, c)
         logging.info("Checking alerts")
         alert(conn, c)
-
+#

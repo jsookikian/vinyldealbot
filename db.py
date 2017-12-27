@@ -39,54 +39,14 @@ def init_tables(cursor):
             )
     ''')
 
-
     cursor.execute('''
-        CREATE TABLE ShowAllAlert (
+        CREATE TABLE CommentSeen (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username INT(11) NOT NULL,
+            username varchar(400) NOT NULL,
+            url varchar(400) NOT NULL,
             created TIMESTAMP NOT NULL
             )
     ''')
-
-def create_test_data(conn, cursor):
-    users = ["jsook724"]
-    create_new_user(conn, "jsook724")
-
-    for i in range(3):
-        create_new_user(cursor, "user" + str(i))
-        users.append("user"+ str(i))
-
-    for user in users:
-        for i in range(10):
-            ts = datetime.datetime.now().timestamp()
-            insert_artist(conn, cursor, user, "Artist" + str(i), ts)
-
-    for user in users:
-        artists = get_user_artists(cursor, user)
-        print ("User: " + user + "\nArtists:\n")
-        for artist in artists:
-            print(artist[0] + "\tts: " + str(artist[1]))
-
-def test_remove(conn, cursor):
-    users = ["jsook724"]
-    # create_new_user(conn, "jsook724")
-    artists = ["Steppenwolf"]
-    print ("adding steppenwolf")
-    ts = datetime.datetime.now().timestamp()
-    insert_artist(conn, cursor, users[0], "Steppenwolf", ts)
-
-    artists = get_user_artists(cursor, users[0])
-    print("User: " + users[0] + "\nArtists:\n")
-    for artist in artists:
-        print(artist[0] + "\tts: " + str(artist[1]))
-
-    remove_artist_alert(conn, cursor, "jsook724", "Steppenwolf", datetime.datetime.timestamp())
-    print ("Removing steppenwolf")
-    artists = get_user_artists(cursor, users[0])
-    print("User: " + users[0] + "\nArtists:\n")
-    for artist in artists:
-        print(artist[0] + "\tts: " + str(artist[1]))
-
 
 def remove_artist_alert(conn, cursor, username, artist, created):
     if user_exists(cursor, username) and user_has_artist(cursor, username, artist):
@@ -151,6 +111,7 @@ def insert_artist(conn, cursor, username, artist, created):
         results = cursor.execute("INSERT INTO UserXArtist(user_id, artist_id) VALUES(?, ?)", (userid, artistid))
     conn.commit()
 
+
 def artist_is_active(conn, cursor, username, artist):
     if user_exists(cursor, username):
         userid = get_user_id(cursor, username)
@@ -194,8 +155,23 @@ def get_user_artists(cursor, username):
         SELECT Artist.name, Artist.created FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
-            WHERE User.name = ? AND Artist.active=1''' ,(username,) )
+            WHERE User.name = ? AND Artist.active=1''' ,(username,))
 
+    rows = cursor.fetchall()
+    return rows
+
+def get_all_users_with_artist(cursor, artist):
+    results = cursor.execute('''
+        SELECT DISTINCT User.name FROM Artist
+            JOIN  UserXArtist ON artist_id = Artist.id
+            JOIN User ON user_id = User.id
+            WHERE lower(Artist.name) = lower(?) AND Artist.active=1''' ,(artist,))
+
+    rows = cursor.fetchall()
+    return rows
+
+def get_all_artists(cursor):
+    results = cursor.execute('SELECT DISTINCT Artist.name FROM Artist')
     rows = cursor.fetchall()
     return rows
 
@@ -231,28 +207,27 @@ def alert_sent(cursor, username, artist, url):
     else:
         return True
 
-def show_alert_sent(cursor, username, created):
+def comment_has_been_read(cursor, username, url, created):
     results = cursor.execute('''
-      SELECT count(*) FROM ShowAllAlert
+      SELECT count(*) FROM CommentRead
       WHERE username=?
+      AND url=?
       AND created=?
-      ''', (username,created))
+      ''', (username,url,created))
     row = results.fetchone()
     if row[0] == 0:
         return False
     else:
         return True
 
-def create_new_show_alert_entry(conn, cursor, username, created):
-    results = cursor.execute("INSERT INTO ShowAllAlert(username, created) VALUES(?, ?)", (username, created))
+
+def mark_comment_read(conn, cursor, username, url, created_ts):
+    results = cursor.execute("INSERT INTO CommentRead(username, url, created) VALUES(?, ?, ?)", (username, url, created_ts))
     conn.commit()
 
 def create_new_alert_entry(conn, cursor, username, artist, url):
     results = cursor.execute("INSERT INTO Alert(username, artist, url) VALUES(?, ?, ?)", (username,artist, url))
     conn.commit()
-# init_tables(c)
-# create_test_data(conn, c)
-# test_remove(conn, c)
 
 def update_tables(conn, cursor):
     # cursor.execute('''
@@ -266,14 +241,64 @@ def update_tables(conn, cursor):
     #     WHERE name <> ''
     #
     # ''')
-    cursor.execute('''
-        CREATE TABLE ShowAllAlert (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username INT(11) NOT NULL,
-            created TIMESTAMP NOT NULL
-            )
-    ''')
-    conn.commit()
+    # cursor.execute('''
+    #     CREATE TABLE ShowAllAlert (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         username INT(11) NOT NULL,
+    #         created TIMESTAMP NOT NULL
+    #         )
+    # ''')
+    # cursor.execute('DROP TABLE CommentRead')
+    # cursor.execute('''
+    #      CREATE TABLE CommentRead (
+    #          id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #          username varchar(100) NOT NULL,
+    #          url varchar(400) NOT NULL,
+    #          created TIMESTAMP NOT NULL
+    #          )
+    #  ''')
+    # conn.commit()
+    pass
 
-
+# def create_test_data(conn, cursor):
+#     users = ["jsook724"]
+#     create_new_user(conn, "jsook724")
+#
+#     for i in range(3):
+#         create_new_user(cursor, "user" + str(i))
+#         users.append("user"+ str(i))
+#
+#     for user in users:
+#         for i in range(10):
+#             ts = datetime.datetime.now().timestamp()
+#             insert_artist(conn, cursor, user, "Artist" + str(i), ts)
+#
+#     for user in users:
+#         artists = get_user_artists(cursor, user)
+#         print ("User: " + user + "\nArtists:\n")
+#         for artist in artists:
+#             print(artist[0] + "\tts: " + str(artist[1]))
+#
+# def test_remove(conn, cursor):
+#     users = ["jsook724"]
+#     # create_new_user(conn, "jsook724")
+#     artists = ["Steppenwolf"]
+#     print ("adding steppenwolf")
+#     ts = datetime.datetime.now().timestamp()
+#     insert_artist(conn, cursor, users[0], "Steppenwolf", ts)
+#
+#     artists = get_user_artists(cursor, users[0])
+#     print("User: " + users[0] + "\nArtists:\n")
+#     for artist in artists:
+#         print(artist[0] + "\tts: " + str(artist[1]))
+#
+#     remove_artist_alert(conn, cursor, "jsook724", "Steppenwolf", datetime.datetime.timestamp())
+#     print ("Removing steppenwolf")
+#     artists = get_user_artists(cursor, users[0])
+#     print("User: " + users[0] + "\nArtists:\n")
+#     for artist in artists:
+#         print(artist[0] + "\tts: " + str(artist[1]))
+# init_tables(c)
+# create_test_data(conn, c)
+# test_remove(conn, c)
 # update_tables(conn, c)
