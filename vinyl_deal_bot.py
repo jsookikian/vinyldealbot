@@ -160,7 +160,7 @@ if __name__ == "__main__":
 
     while True:
         logging.info("Reading posts")
-        # readPosts(conn, c)
+        readPosts(conn, c)
         logging.info("Checking alerts")
         alert(conn, c)
 #
