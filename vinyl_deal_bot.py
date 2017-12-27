@@ -113,7 +113,7 @@ def executeCommand(conn, cursor, comment, body):
 def readPosts(conn, cursor):
     numComments = 0
     start = datetime.datetime.now()
-    for submission in subreddit.hot(limit=200):
+    for submission in subreddit.new(limit=100):
         for comment in submission.comments.list():
             numComments += 1
             if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]":
@@ -141,7 +141,7 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
 def alert(conn, cursor):
     artists =  get_all_artists(cursor)
     # Iterate through all posts in the top 50 hot posts
-    for submission in subreddit.hot(limit=50):
+    for submission in subreddit.new(limit=100):
         title = submission.title.replace('Lowest', '', 1)
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
@@ -149,7 +149,7 @@ def alert(conn, cursor):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
-                    if alert_sent(cursor, user, artist, submission.url):
+                    if not alert_sent(cursor, user, artist, submission.url):
                         send_alert(conn, cursor, reddit, submission, artist, user)
 
 if __name__ == "__main__":
