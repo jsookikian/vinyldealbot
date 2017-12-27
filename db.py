@@ -272,4 +272,4 @@ def update_tables(conn, cursor):
     conn.commit()
 
 
-update_tables(conn, c)
+# update_tables(conn, c)
