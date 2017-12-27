@@ -17,13 +17,19 @@ def removeAllArtists(conn, cursor, comment):
     created = comment.created_utc
     removedArtists = []
     for artist,created in artists:
-        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
+        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             removedArtists.append(artist)
-    if len(removedArtists) > 0:
-        logging.info("Removed all alerts for user " + username)
-        comment.reply(getRemovedAllCommentString(removedArtists))
-        time.sleep(3)
+    if not show_alert_sent(cursor, username, created):
+        create_new_show_alert_entry(conn, cursor, username, created)
+        if len(removedArtists) > 0:
+            logging.info("Removed all alerts for user " + username)
+            comment.reply(getRemovedAllCommentString(removedArtists))
+            time.sleep(3)
+        else:
+
+            reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
+            comment.reply(reply)
 
 def showAlerts(conn, cursor, comment):
     username = comment.author.name
@@ -77,7 +83,7 @@ def getRemoveArtistsCommentString(artists):
 
 def getRemovedAllCommentString(artists):
     comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
-    for artist,created in artists:
+    for artist in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
     comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"

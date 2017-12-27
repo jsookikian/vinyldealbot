@@ -142,9 +142,13 @@ def insert_artist(conn, cursor, username, artist, created):
     if (not user_exists(cursor, username)):
         return -1
     userid = get_user_id(cursor, username)
-    results = cursor.execute("INSERT INTO Artist(name, created, active) VALUES(?, ?, ?)", (artist, created, 1))
-    artistid = cursor.lastrowid
-    results = cursor.execute("INSERT INTO UserXArtist(user_id, artist_id) VALUES(?, ?)", (userid, artistid))
+    if user_has_artist(cursor, username, artist):
+        artistid =get_artist_id(cursor, username, artist)
+        results = cursor.execute("Update ARTIST SET Active=1, created= ? WHERE id=?", (created, artistid,))
+    else:
+        results = cursor.execute("INSERT INTO Artist(name, created, active) VALUES(?, ?, ?)", (artist, created, 1))
+        artistid = cursor.lastrowid
+        results = cursor.execute("INSERT INTO UserXArtist(user_id, artist_id) VALUES(?, ?)", (userid, artistid))
     conn.commit()
 
 def artist_is_active(conn, cursor, username, artist):
