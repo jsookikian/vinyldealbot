@@ -14,12 +14,14 @@ subreddit = reddit.subreddit("vinyldeals")
 def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
     artists = get_user_artists(cursor, username)
+    removedArtists = []
     for artist,created in artists:
         if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
-    if len(artists) > 0:
+            removedArtists.append(artist)
+    if len(removeArtists) > 0:
         logging.info("Removed all alerts for user " + username)
-        comment.reply(getRemovedAllCommentString(artists))
+        comment.reply(getRemovedAllCommentString(removedArtists))
         time.sleep(3)
 
 def showAlerts(conn, cursor, comment):
