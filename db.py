@@ -179,7 +179,7 @@ def get_user_artists(cursor, username):
         SELECT Artist.name, Artist.created FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
-            WHERE User.name = ?''' ,(username,) )
+            WHERE User.name = ? AND Artist.active=1''' ,(username,) )
 
     rows = cursor.fetchall()
     return rows

@@ -18,6 +18,7 @@ def removeAllArtists(conn, cursor, comment):
         if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
     if len(artists) > 0:
+        logging.info("Removed all alerts for user " + username)
         comment.reply(getRemovedAllCommentString(artists))
         time.sleep(3)
 
@@ -29,6 +30,8 @@ def showAlerts(conn, cursor, comment):
         comment.reply(reply)
 
     if len(artists) > 0:
+        logging.info("Showing all alerts for user " + username)
+
         comment.reply(getShowAllCommentString(artists))
         time.sleep(3)
     else:
