@@ -11,6 +11,30 @@ c = conn.cursor()
 reddit = praw.Reddit('VinylDealBot')
 subreddit = reddit.subreddit("vinyldeals")
 
+def removeAllArtists(conn, cursor, comment):
+    username = comment.author.name
+    artists = get_user_artists(cursor, username)
+    for artist,created in artists:
+        if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
+            remove_artist_alert(conn, cursor, username, artist, created)
+    if len(artists) > 0:
+        comment.reply(getRemovedAllCommentString(artists))
+        time.sleep(3)
+
+def showAlerts(conn, cursor, comment):
+    username = comment.author.name
+    artists = get_user_artists(cursor, username)
+    if (artists == -1):
+        reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
+        comment.reply(reply)
+
+    if len(artists) > 0:
+        comment.reply(getShowAllCommentString(artists))
+        time.sleep(3)
+    else:
+        reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
+        comment.reply(reply)
+
 
 def removeArtists(conn, cursor, comment):
     artists = " ".join(comment.body.split()[2:])
@@ -21,13 +45,37 @@ def removeArtists(conn, cursor, comment):
         if user_has_artist(cursor, username, artist) and artist_is_active(conn, cursor, username, artist) and created > get_artist_timestamp(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             logging.info("Removed " + artist + " from user " + username)
-            reply = "**VinylDealBot**\n\nYou will no longer receive alerts for:\n\n " + artist
-            comment.reply(reply)
-
+    if len(artists) > 0:
+        comment.reply(getRemoveArtistsCommentString(artists))
+        time.sleep(3)
 
 def getCommentString(artists):
     comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n "
     for artist in artists:
+        comment +=  artist + "\n\n"
+    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    return comment
+
+def getRemoveArtistsCommentString(artists):
+    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
+    for artist in artists:
+        comment +=  artist + "\n\n"
+    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    return comment
+
+def getRemovedAllCommentString(artists):
+    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
+    for artist,created in artists:
+        comment +=  artist + "\n\n"
+    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    return comment
+
+def getShowAllCommentString(artists):
+    comment = "**VinylDealBot**\n\nYou are currently signed up for alerts on the following:\n\n "
+    for artist,created in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
     comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
@@ -64,8 +112,12 @@ def readPosts(conn, cursor):
         for comment in submission.comments.list():
             cmt = comment.body.split(" ")
             if re.search("VinylDealBot",comment.body, re.IGNORECASE) and cmt[0] == "VinylDealBot":
-                if re.search("Remove", comment.body, re.IGNORECASE) and cmt[1]:
+                if re.search("Remove ", comment.body, re.IGNORECASE) and cmt[1].lower() == "remove":
                     removeArtists(conn, cursor, comment)
+                elif re.search("RemoveAll", comment.body, re.IGNORECASE) and cmt[1].lower() == "removeall":
+                    removeAllArtists()
+                elif re.search("ShowAlerts", comment.body, re.IGNORECASE) and cmt[1].lower() == "showalerts":
+                    showAlerts()
                 else:
                     addArtists(conn, cursor, comment)
 
