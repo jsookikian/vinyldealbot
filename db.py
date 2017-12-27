@@ -240,7 +240,7 @@ def show_alert_sent(cursor, username, created):
         return True
 
 def create_new_show_alert_entry(conn, cursor, username, created):
-    results = cursor.execute("INSERT INTO Alert(username, created) VALUES(?, ?)", (username, created))
+    results = cursor.execute("INSERT INTO ShowAlert(username, created) VALUES(?, ?)", (username, created))
     conn.commit()
 
 def create_new_alert_entry(conn, cursor, username, artist, url):
