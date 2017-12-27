@@ -44,7 +44,7 @@ def init_tables(cursor):
         CREATE TABLE ShowAllAlert (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username INT(11) NOT NULL,
-            created TIMESTAMP NOT NULL,
+            created TIMESTAMP NOT NULL
             )
     ''')
 
@@ -229,7 +229,7 @@ def alert_sent(cursor, username, artist, url):
 
 def show_alert_sent(cursor, username, created):
     results = cursor.execute('''
-      SELECT count(*) FROM Alert
+      SELECT count(*) FROM ShowAlert
       WHERE username=?
       AND created=?
       ''', (username,created))
@@ -256,13 +256,20 @@ def update_tables(conn, cursor):
     #     ADD COLUMN active INTEGER
     # ''')
 
+    # cursor.execute('''
+    #     UPDATE Artist
+    #     SET active = 1
+    #     WHERE name <> ''
+    #
+    # ''')
     cursor.execute('''
-        UPDATE Artist
-        SET active = 1
-        WHERE name <> ''
-
+        CREATE TABLE ShowAllAlert (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username INT(11) NOT NULL,
+            created TIMESTAMP NOT NULL
+            )
     ''')
     conn.commit()
 
 
-# update_tables(conn, c)
+update_tables(conn, c)
