@@ -21,13 +21,14 @@ def removeAllArtists(conn, cursor, comment):
                 and artist_is_active(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             removedArtists.append(artist)
-        if len(removedArtists) > 0:
-            logging.info("Removed all alerts for user " + username)
-            comment.reply(getRemovedAllCommentString(removedArtists))
-            time.sleep(3)
-        else:
-            reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-            comment.reply(reply)
+    if len(removedArtists) > 0:
+        logging.info("Removed all alerts for user " + username)
+        comment.reply(getRemovedAllCommentString(removedArtists))
+        time.sleep(3)
+    else:
+        reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
+        comment.reply(reply)
+
 
 def showAlerts(conn, cursor, comment):
     username = comment.author.name
@@ -110,6 +111,7 @@ def executeCommand(conn, cursor, comment, body):
         addArtists(conn, cursor, comment)
         logging.info("Add Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
+
 def readPosts(conn, cursor):
     numComments = 0
     start = datetime.datetime.now()
@@ -145,6 +147,8 @@ def alert(conn, cursor):
         title = submission.title.replace('Lowest', '', 1)
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
+            if (artist == '' or not isinstance(artist, str)):
+                count = 1
             if re.search(artist, title, re.IGNORECASE):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
@@ -160,7 +164,7 @@ if __name__ == "__main__":
 
     while True:
         logging.info("Reading posts")
-        readPosts(conn, c)
+        # readPosts(conn, c)
         logging.info("Checking alerts")
         alert(conn, c)
 #
