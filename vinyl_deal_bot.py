@@ -150,7 +150,7 @@ def alert(conn, cursor):
         title = submission.title.replace('Lowest', '', 1)
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
-            if re.search(artist, title, re.IGNORECASE):
+            if re.search(" " + artist + " ", title, re.IGNORECASE):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
