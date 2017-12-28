@@ -74,6 +74,7 @@ def addArtists(conn, cursor, comment):
         create_new_user(conn, cursor, username)
     addedArtists = []
     for artist in artists:
+        artist = artist.rstrip().lstrip()
         if not user_has_artist(cursor, username, artist):
             insert_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
@@ -123,7 +124,7 @@ def readPosts(conn, cursor):
                 permalink = comment.permalink
                 created = comment.created_utc
                 body = comment.body.split(" ")
-                if re.search("VinyDealBot",comment.body, re.IGNORECASE) \
+                if re.search("vinyldealbot",comment.body.lower(), re.IGNORECASE) \
                         and body[0].lower() == "vinyldealbot" \
                         and not comment_has_been_read(cursor, username, permalink, created) \
                         and comment.author.name != "VinylDealBot":
