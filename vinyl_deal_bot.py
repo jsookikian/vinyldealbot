@@ -17,7 +17,7 @@ def removeAllArtists(conn, cursor, comment):
     permalink = comment.permalink
     removedArtists = []
     for artist,created in artists:
-        if user_has_artist(cursor, username, artist) \
+        if artist != "" and user_has_artist(cursor, username, artist) \
                 and artist_is_active(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
             removedArtists.append(artist)
@@ -127,7 +127,8 @@ def readPosts(conn, cursor):
                 if re.search("vinyldealbot",comment.body.lower(), re.IGNORECASE) \
                         and body[0].lower() == "vinyldealbot" \
                         and not comment_has_been_read(cursor, username, permalink, created) \
-                        and comment.author.name != "VinylDealBot":
+                        and comment.author.name != "VinylDealBot"\
+                        and len(body) > 1:
                     mark_comment_read(conn, cursor, username, permalink, created)
                     executeCommand(conn, cursor, comment, body)
 
