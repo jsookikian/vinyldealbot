@@ -124,7 +124,7 @@ def readPosts(conn, cursor):
                 created = comment.created_utc
                 body = comment.body.split(" ")
                 if re.search("VinyDealBot",comment.body, re.IGNORECASE) \
-                        and body[0] == "vinyldealbot" \
+                        and body[0].lower() == "vinyldealbot" \
                         and not comment_has_been_read(cursor, username, permalink, created) \
                         and comment.author.name != "VinylDealBot":
                     mark_comment_read(conn, cursor, username, permalink, created)
@@ -148,8 +148,6 @@ def alert(conn, cursor):
         title = submission.title.replace('Lowest', '', 1)
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
-            if (artist == '' or not isinstance(artist, str)):
-                count = 1
             if re.search(artist, title, re.IGNORECASE):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
