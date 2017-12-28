@@ -123,7 +123,7 @@ def readPosts(conn, cursor):
                 permalink = comment.permalink
                 created = comment.created_utc
                 body = comment.body.split(" ")
-                if re.search("VinylDealBot",comment.body, re.IGNORECASE) \
+                if re.search("vinyldealbot",body[0].lower(), re.IGNORECASE) \
                         and body[0] == "VinylDealBot" \
                         and not comment_has_been_read(cursor, username, permalink, created):
                     mark_comment_read(conn, cursor, username, permalink, created)
@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     while True:
         logging.info("Reading posts")
-        # readPosts(conn, c)
+        readPosts(conn, c)
         logging.info("Checking alerts")
         alert(conn, c)
-#
+
