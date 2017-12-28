@@ -165,7 +165,7 @@ def get_all_users_with_artist(cursor, artist):
         SELECT DISTINCT User.name FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
-            WHERE lower(Artist.name) = lower(?) AND Artist.active=1''' ,(artist,))
+            WHERE Artist.name = ? AND Artist.active=1''' ,(artist,))
 
     rows = cursor.fetchall()
     return [user[0] for user in rows]
@@ -186,7 +186,7 @@ def user_has_artist(cursor, username, artist):
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
             WHERE User.name = ?
-            AND lower(Artist.name) = lower(?)
+            AND Artist.name = ?
             ''', (username,artist)
     )
     row = results.fetchone()
