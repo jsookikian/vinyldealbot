@@ -176,8 +176,9 @@ def get_all_artists(cursor):
     return [artist[0] for artist in rows]
 
 def get_users(cursor):
-    results = cursor.execute('SELECT * FROM USER')
-    return results.fetchall()
+    results = cursor.execute('SELECT name FROM User')
+    rows = cursor.fetchall()
+    return [user[0] for user in rows]
 
 def user_has_artist(cursor, username, artist):
     results = cursor.execute('''

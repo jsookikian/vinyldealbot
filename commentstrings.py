@@ -3,7 +3,7 @@ def getCommentString(artists):
     for artist in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getRemoveArtistsCommentString(artists):
@@ -11,7 +11,7 @@ def getRemoveArtistsCommentString(artists):
     for artist in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getRemovedAllCommentString(artists):
@@ -19,7 +19,7 @@ def getRemovedAllCommentString(artists):
     for artist in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getShowAllCommentString(artists):
@@ -27,10 +27,19 @@ def getShowAllCommentString(artists):
     for artist,created in artists:
         comment +=  artist + "\n\n"
     comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with commas"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def get_template(artist, title, url, permalink):
     return '**VinylDealBot** on [r/VinylDeals](http://reddit.com/r/VinylDeals)\n\n' \
             + "[" + title + "](" + permalink + ")\n\n" \
             + url
+
+def getUpdateString():
+    comment = "**VinylDealBot**\n\nThere has been an update to the Vinyl Deal Bot\n\n "
+    comment += "Now, you must use a semicolon (;) to separate your artists so now you can use artists with a comma in their name\n\n"
+    comment += "Example:\n\n```VinylDealBot Crosby, Stills, and Nash; Tyler, The Creator; David Bowie```\n\n"
+    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons (;)\n\n"
+    comment += "Thank you for using Vinyl Deal Bot!"
+    return comment

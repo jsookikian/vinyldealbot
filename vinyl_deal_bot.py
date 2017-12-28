@@ -45,10 +45,9 @@ def showAlerts(conn, cursor, comment):
             comment.reply(getShowAllCommentString(artists))
             time.sleep(3)
 
-
 def removeArtists(conn, cursor, comment):
     artists = " ".join(comment.body.split()[2:])
-    artists = [ x.lstrip() for x in artists.split(",")]
+    artists = [ x.lstrip() for x in artists.split(";")]
     username = comment.author.name
     created = comment.created_utc
     for artist in artists:
@@ -64,8 +63,11 @@ def removeArtists(conn, cursor, comment):
 
 def addArtists(conn, cursor, comment):
     # Get the artist name
+    #Remove 'vinyldealbot' from comment string
+
     artists = " ".join(comment.body.split()[1:])
-    artists = [ x.lstrip() for x in artists.split(",")]
+    #create a list of the artists delimited by semicolon
+    artists = [ x.lstrip() for x in artists.split(";")]
 
     # Create artist obj
     created = comment.created_utc
@@ -139,7 +141,7 @@ def readPosts(conn, cursor):
 def send_alert(conn, cursor, reddit, submission, artist, username):
     template = get_template(artist, submission.title, submission.url, submission.permalink)
     create_new_alert_entry(conn, cursor, username, artist, submission.url)
-    reddit.redditor(username).message('VinylDealBot: ' + artist + " on sale",  template)
+    reddit.redditor(username).message("VinylDealBot: " + artist + " on sale",  template)
     logging.info("Sent message to " + username + "for " + artist + "\n" + submission.title)
 
 
@@ -156,6 +158,18 @@ def alert(conn, cursor):
                 for user in users:
                     if not alert_sent(cursor, user, artist, submission.url):
                         send_alert(conn, cursor, reddit, submission, artist, user)
+
+def sendUpdateToUsers(cursor):
+    users = get_users(cursor)[3:]
+    reply = getUpdateString()
+    count = 0
+    for user in users:
+        reddit.redditor(user).message("VinylDealBot Update! Read before you use me again", reply)
+        time.sleep(3)
+        logging.info("Sent update message to " + user)
+        count += 1
+    logging.info("Total Messages sent:  " + str(count))
+
 
 if __name__ == "__main__":
     conn = sqlite3.connect('alerts.db')
