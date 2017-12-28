@@ -185,7 +185,7 @@ def user_has_artist(cursor, username, artist):
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
             WHERE User.name = ?
-            AND Artist.name = ?
+            AND lower(Artist.name) = lower(?)
             ''', (username,artist)
     )
     row = results.fetchone()
