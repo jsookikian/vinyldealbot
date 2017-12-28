@@ -123,9 +123,10 @@ def readPosts(conn, cursor):
                 permalink = comment.permalink
                 created = comment.created_utc
                 body = comment.body.split(" ")
-                if re.search("vinyldealbot",comment.body, re.IGNORECASE) \
+                if re.search("VinyDealBot",comment.body, re.IGNORECASE) \
                         and body[0] == "vinyldealbot" \
-                        and not comment_has_been_read(cursor, username, permalink, created):
+                        and not comment_has_been_read(cursor, username, permalink, created) \
+                        and comment.author.name != "VinylDealBot":
                     mark_comment_read(conn, cursor, username, permalink, created)
                     executeCommand(conn, cursor, comment, body)
 
