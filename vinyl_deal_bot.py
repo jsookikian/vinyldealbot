@@ -50,14 +50,16 @@ def removeArtists(conn, cursor, comment):
     artists = [ x.lstrip() for x in artists.split(";")]
     username = comment.author.name
     created = comment.created_utc
+    removedArtists = []
     for artist in artists:
         if user_has_artist(cursor, username, artist) \
                 and artist_is_active(conn, cursor, username, artist) \
                 and created > get_artist_timestamp(conn, cursor, username, artist):
             remove_artist_alert(conn, cursor, username, artist, created)
+            removedArtists.append(artist)
             logging.info("Removed " + artist + " from user " + username)
-    if len(artists) > 0:
-        comment.reply(getRemoveArtistsCommentString(artists))
+    if len(removedArtists) > 0:
+        comment.reply(getRemoveArtistsCommentString(removedArtists))
         time.sleep(3)
 
 
@@ -118,7 +120,7 @@ def executeCommand(conn, cursor, comment, body):
 def readPosts(conn, cursor):
     numComments = 0
     start = datetime.datetime.now()
-    for submission in subreddit.new(limit=100):
+    for submission in subreddit.hot(limit=50):
         for comment in submission.comments.list():
             numComments += 1
             if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]":
@@ -126,6 +128,8 @@ def readPosts(conn, cursor):
                 permalink = comment.permalink
                 created = comment.created_utc
                 body = comment.body.split(" ")
+                if (comment.author.name == "aragurn87"):
+                    count = 1
                 if re.search("vinyldealbot",comment.body.lower(), re.IGNORECASE) \
                         and body[0].lower() == "vinyldealbot" \
                         and not comment_has_been_read(cursor, username, permalink, created) \
