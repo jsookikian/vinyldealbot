@@ -9,7 +9,7 @@ class VinylDealBot:
         self.pidfile_path = '/var/run/vinyldealbot/vinyldealbot.pid'
         self.pidfile_timeout = 5
 
-    def run():
+    def run(self):
         conn = sqlite3.connect('alerts.db')
         c = conn.cursor()
         logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
