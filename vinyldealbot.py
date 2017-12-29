@@ -1,6 +1,7 @@
 from bot import *
 from daemon import runner
 import os
+import praw
 class VinylDealBot:
     def __init__(self):
         self.stdin_path = '/dev/null'
