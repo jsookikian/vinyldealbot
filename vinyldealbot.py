@@ -1,6 +1,6 @@
 from bot import *
 from daemon import runner
-
+import os
 class VinylDealBot:
     def __init__(self):
         self.stdin_path = '/dev/null'
@@ -10,6 +10,7 @@ class VinylDealBot:
         self.pidfile_timeout = 5
 
     def run(self):
+        print(os.path.dirname(os.path.realpath(__file__)))
         conn = sqlite3.connect('alerts.db')
         c = conn.cursor()
         logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
