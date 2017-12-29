@@ -175,7 +175,7 @@ def sendUpdateToUsers(cursor):
     logging.info("Total Messages sent:  " + str(count))
 
 
-if __name__ == "__main__":
+def run():
     conn = sqlite3.connect('alerts.db')
     c = conn.cursor()
     logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
