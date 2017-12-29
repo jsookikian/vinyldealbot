@@ -21,7 +21,7 @@
 ### END INIT INFO
 
 # Activate the python virtual environment
-    . /path_to_virtualenv/activate
+    . ~/vinyldealbot/vinyldealbot/activate
 
 case "$1" in
   start)
