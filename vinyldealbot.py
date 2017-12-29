@@ -8,6 +8,7 @@ class VinylDealBot:
         self.stderr_path = '/dev/tty'
         self.pidfile_path = '/var/run/vinyldealbot/vinyldealbot.pid'
         self.pidfile_timeout = 5
+        self.reddit = praw.Reddit('VinylDealBot')
 
     def run(self):
         print(os.path.dirname(os.path.realpath(__file__)))
@@ -15,14 +16,13 @@ class VinylDealBot:
         c = conn.cursor()
         logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
         logging.info("Launching VinylDealBot...")
-        reddit = praw.Reddit('VinylDealBot')
         subreddit = reddit.subreddit("vinyldeals")
 
         while True:
             logging.info("Reading posts")
-            readPosts(conn, c, reddit, subreddit)
+            readPosts(conn, c, self.reddit, subreddit)
             logging.info("Checking alerts")
-            alert(conn, c, reddit, subreddit)
+            alert(conn, c, self.reddit, subreddit)
 
 vinyldealbot = VinylDealBot()
 daemon_runner = runner.DaemonRunner(vinyldealbot)
