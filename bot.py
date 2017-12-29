@@ -5,10 +5,6 @@ import logging
 from db import *
 from commentstrings import *
 
-conn = sqlite3.connect('alerts.db')
-c = conn.cursor()
-reddit = praw.Reddit('VinylDealBot')
-subreddit = reddit.subreddit("vinyldeals")
 
 def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
@@ -117,7 +113,7 @@ def executeCommand(conn, cursor, comment, body):
         logging.info("Add Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
 
-def readPosts(conn, cursor):
+def readPosts(conn, cursor, reddit, subreddit):
     numComments = 0
     start = datetime.datetime.now()
     for submission in subreddit.hot(limit=50):
@@ -149,7 +145,7 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
     logging.info("Sent message to " + username + "for " + artist + "\n" + submission.title)
 
 
-def alert(conn, cursor):
+def alert(conn, cursor, reddit, subreddit):
     artists =  get_all_artists(cursor)
     # Iterate through all posts in the top 50 hot posts
     for submission in subreddit.new(limit=100):
@@ -163,7 +159,7 @@ def alert(conn, cursor):
                     if not alert_sent(cursor, user, artist, submission.url):
                         send_alert(conn, cursor, reddit, submission, artist, user)
 
-def sendUpdateToUsers(cursor):
+def sendUpdateToUsers(cursor, reddit):
     users = get_users(cursor)[3:]
     reply = getUpdateString()
     count = 0
@@ -175,15 +171,4 @@ def sendUpdateToUsers(cursor):
     logging.info("Total Messages sent:  " + str(count))
 
 
-def run_bot():
-    conn = sqlite3.connect('alerts.db')
-    c = conn.cursor()
-    logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
-    logging.info("Launching VinylDealBot...")
-
-    while True:
-        logging.info("Reading posts")
-        readPosts(conn, c)
-        logging.info("Checking alerts")
-        alert(conn, c)
 
