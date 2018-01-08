@@ -5,7 +5,6 @@ import logging
 from db import *
 from commentstrings import *
 
-
 def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
     artists = get_user_artists(cursor, username)
@@ -112,27 +111,32 @@ def executeCommand(conn, cursor, comment, body):
         addArtists(conn, cursor, comment)
         logging.info("Add Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
-
-def readPosts(conn, cursor, reddit, subreddit):
+def readPost(conn, cursor, reddit, subreddit, submission):
     numComments = 0
+    for comment in submission.comments.list():
+        numComments += 1
+        if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]":
+            username = comment.author.name
+            permalink = comment.permalink
+            created = comment.created_utc
+            body = comment.body.split(" ")
+            if (comment.author.name == "aragurn87"):
+                count = 1
+            if re.search("vinyldealbot", comment.body.lower(), re.IGNORECASE) \
+                    and body[0].lower() == "vinyldealbot" \
+                    and not comment_has_been_read(cursor, username, permalink, created) \
+                    and comment.author.name != "VinylDealBot" \
+                    and len(body) > 1:
+                mark_comment_read(conn, cursor, username, permalink, created)
+                executeCommand(conn, cursor, comment, body)
+    return numComments
+def readPosts(conn, cursor, reddit, subreddit):
     start = datetime.datetime.now()
+    numComments = 0
+    pinnedThread = reddit.submission(url="https://www.reddit.com/r/VinylDeals/comments/7mm76p/discussion_introducing_the_vinyl_deal_bot/")
+    numComments += readPost(conn, cursor, reddit, subreddit, pinnedThread)
     for submission in subreddit.hot(limit=50):
-        for comment in submission.comments.list():
-            numComments += 1
-            if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]":
-                username = comment.author.name
-                permalink = comment.permalink
-                created = comment.created_utc
-                body = comment.body.split(" ")
-                if (comment.author.name == "aragurn87"):
-                    count = 1
-                if re.search("vinyldealbot",comment.body.lower(), re.IGNORECASE) \
-                        and body[0].lower() == "vinyldealbot" \
-                        and not comment_has_been_read(cursor, username, permalink, created) \
-                        and comment.author.name != "VinylDealBot"\
-                        and len(body) > 1:
-                    mark_comment_read(conn, cursor, username, permalink, created)
-                    executeCommand(conn, cursor, comment, body)
+        numComments += readPost(conn, cursor, reddit, subreddit, submission)
 
     end = datetime.datetime.now()
     logging.info("Comments read: " + str(numComments) + "\tTime Taken: " + str(end - start) + "\tAverage Time(s): " + str((end - start).total_seconds() / numComments))
