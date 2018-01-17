@@ -116,7 +116,7 @@ def readPost(conn, cursor, reddit, subreddit, submission):
     submission.comment_sort = 'new'
     for comment in submission.comments.list():
         numComments += 1
-        if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]" and comment is not None:
+        if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]" and comment.author is not None:
             username = comment.author.name
             permalink = comment.permalink
             created = comment.created_utc
