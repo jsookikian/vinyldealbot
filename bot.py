@@ -4,6 +4,15 @@ import time
 import logging
 from db import *
 from commentstrings import *
+from django.utils import encoding
+
+
+def convert_unicode_to_string(x):
+    """
+    >>> convert_unicode_to_string(u'ni\xf1era')
+    'niera'
+    """
+    return encoding.smart_str(x, encoding='ascii', errors='ignore')
 
 def removeAllArtists(conn, cursor, comment):
     username = comment.author.name
@@ -158,7 +167,8 @@ def alert(conn, cursor, reddit, subreddit):
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
             print (artist)
-            if title.lower().find(artist.lower()) > 0 :
+            t = convert_unicode_to_string(title.lower())
+            if t.find(artist.lower()) > 0 :
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
