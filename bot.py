@@ -158,7 +158,7 @@ def alert(conn, cursor, reddit, subreddit):
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
             print (artist)
-            if artist.lower in title.lower():
+            if title.lower().find(artist.lower()):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
