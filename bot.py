@@ -147,7 +147,7 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
     template = get_template(artist, submission.title, submission.url, submission.permalink)
     create_new_alert_entry(conn, cursor, username, artist, submission.url)
     reddit.redditor(username).message("VinylDealBot: " + artist + " on sale",  template)
-    logging.info("Sent message to " + username + "for " + artist + "\n" + submission.title)
+    logging.info("Sent message to " + username + " for " + artist + "\n" + submission.title)
 
 
 def alert(conn, cursor, reddit, subreddit):
@@ -157,7 +157,7 @@ def alert(conn, cursor, reddit, subreddit):
         title = submission.title.replace('Lowest', '', 1)
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
-            if re.search(" " + artist + " ", title, re.IGNORECASE):
+            if re.search(artist, title, re.IGNORECASE):
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
