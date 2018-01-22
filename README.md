@@ -32,5 +32,4 @@ To show all of the alerts you set up:
 
 ```VinylDealBot ShowAlerts```
 
-
-Hope you guys enjoy! Feel free to use this thread to test it out
+Please see [this](https://www.reddit.com/r/VinylDeals/comments/7mm76p/discussion_introducing_the_vinyl_deal_bot/) thread to use the bot!
