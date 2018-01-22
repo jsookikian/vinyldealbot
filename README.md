@@ -2,7 +2,7 @@
 
  Never miss another vinyl deal again!
 
-I recently wrote a bot which sends notifications to you when your favorite artist or album goes on sale on  [/r/VinylDeals] (/r/VinylDeals).
+I recently wrote a bot which sends notifications to you when your favorite artist or album goes on sale on  [/r/VinylDeals](/r/VinylDeals).
 
 To use it, you just need to comment on one of the top 50 posts on /r/VinylDeals with 
 
