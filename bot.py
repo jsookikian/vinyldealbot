@@ -158,6 +158,12 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
     reddit.redditor(username).message("VinylDealBot: " + artist + " on sale",  template)
     logging.info("Sent message to " + username + " for " + artist + "\n" + submission.title)
 
+def titleContainsArtist(artist, title):
+    cases = [artist + " ", artist + ";", artist + ":", artist + ";"]
+    for case in cases:
+        if title.find(case) > 0:
+            return True
+    return False
 
 def alert(conn, cursor, reddit, subreddit):
     artists =  get_all_artists(cursor)
@@ -167,7 +173,7 @@ def alert(conn, cursor, reddit, subreddit):
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
             t = convert_unicode_to_string(title.lower())
-            if t.find((artist + " ").lower()) > 0  or t.find((artist + "-").lower()) > 0 and artist != " ":
+            if titleContainsArtist(artist.lower(), t) and artist != " ":
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
