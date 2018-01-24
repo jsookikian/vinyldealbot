@@ -83,7 +83,7 @@ def addArtists(conn, cursor, comment):
     addedArtists = []
     for artist in artists:
         artist = artist.rstrip().lstrip()
-        if not user_has_artist(cursor, username, artist):
+        if not user_has_artist(cursor, username, artist) and artist != " ":
             insert_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
             logging.info(comment.author.name + " wants alerts for " + artist)
