@@ -173,7 +173,7 @@ def alert(conn, cursor, reddit, subreddit):
         # check if an artist that a user wants alerts for is in the title
         for artist in artists:
             t = convert_unicode_to_string(title.lower())
-            if titleContainsArtist(artist.lower(), t) and artist != " ":
+            if titleContainsArtist(artist.lower(), t) and artist != " " and artist != "" and len(artist) > 1:
                 users = get_all_users_with_artist(cursor, artist)
                 # send users alerts
                 for user in users:
