@@ -17,14 +17,19 @@ class VinylDealBot:
         c = conn.cursor()
         logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
         logging.info("Launching VinylDealBot...")
-        subreddit = reddit.subreddit("vinyldeals")
+        subreddit = self.reddit.subreddit("vinyldeals")
 
         while True:
-            logging.info("Reading posts")
-            readPosts(conn, c, self.reddit, subreddit)
-            logging.info("Checking alerts")
-            alert(conn, c, self.reddit, subreddit)
+            try:
+                logging.info("Reading posts")
+                readPosts(conn, c, self.reddit, subreddit)
+                logging.info("Checking alerts")
+                alert(conn, c, self.reddit, subreddit)
+            except Exception as e:
+                logging.info("Error: " + e)
+
 
 vinyldealbot = VinylDealBot()
+vinyldealbot.run()
 daemon_runner = runner.DaemonRunner(vinyldealbot)
 daemon_runner.do_action()
