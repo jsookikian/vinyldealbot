@@ -146,7 +146,10 @@ def get_artist_timestamp(conn, cursor, username, artist):
                 ''', (username, artist)
         )
         row = results.fetchone()
-        return row[0]
+        if row is None:
+            return datetime.datetime.now().timestamp()
+        else:
+            row[0]
 
 
 def get_user_artists(cursor, username):
@@ -192,6 +195,8 @@ def user_has_artist(cursor, username, artist):
             ''', (username,artist)
     )
     row = results.fetchone()
+    if row is None:
+        return False
     if row[0] >= 1:
         return True
     else:
@@ -205,6 +210,8 @@ def alert_sent(cursor, username, artist, url):
       AND url=?
       ''', (username,artist, url))
     row = results.fetchone()
+    if row is None:
+        return False
     if row[0] == 0:
         return False
     else:
@@ -218,6 +225,8 @@ def comment_has_been_read(cursor, username, url, created):
       AND created=?
       ''', (username,url,created))
     row = results.fetchone()
+    if row is None:
+        return False
     if row[0] == 0:
         return False
     else:
