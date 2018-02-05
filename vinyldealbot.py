@@ -12,21 +12,21 @@ class VinylDealBot:
         self.reddit = praw.Reddit('VinylDealBot')
 
     def run(self):
-        print(os.path.dirname(os.path.realpath(__file__)))
-        conn = sqlite3.connect('alerts.db')
-        c = conn.cursor()
-        logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
-        logging.info("Launching VinylDealBot...")
-        subreddit = self.reddit.subreddit("vinyldeals")
+        try:
+            print(os.path.dirname(os.path.realpath(__file__)))
+            conn = sqlite3.connect('alerts.db')
+            c = conn.cursor()
+            logging.basicConfig(filename="vinylbot.log", level=logging.INFO, format="%(asctime)s - %(message)s")
+            logging.info("Launching VinylDealBot...")
+            subreddit = self.reddit.subreddit("vinyldeals")
 
-        while True:
-            try:
+            while True:
                 logging.info("Reading posts")
                 readPosts(conn, c, self.reddit, subreddit)
                 logging.info("Checking alerts")
                 alert(conn, c, self.reddit, subreddit)
-            except Exception as e:
-                logging.info("Error: " + e)
+        except Exception as e:
+            logging.info("Error: " + str(e))
 
 
 vinyldealbot = VinylDealBot()
