@@ -110,8 +110,7 @@ def executeCommand(conn, cursor, comment, body):
         removeAllArtists(conn, cursor, comment)
         logging.info("Remove All Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
-    elif re.search("ShowAlerts", comment.body, re.IGNORECASE) \
-            and body[1].lower() == "showalerts":
+    elif re.search("ShowAlerts", comment.body, re.IGNORECASE)
         begin_execute = datetime.datetime.now()
         showAlerts(conn, cursor, comment)
         logging.info("Show Alerts...time taken:\t" + str(datetime.datetime.now() - begin_execute))
@@ -130,8 +129,7 @@ def readPost(conn, cursor, reddit, subreddit, submission):
             permalink = comment.permalink
             created = comment.created_utc
             body = comment.body.split(" ")
-            if (comment.author.name == "aragurn87"):
-                count = 1
+
             if re.search("vinyldealbot", comment.body.lower(), re.IGNORECASE) \
                     and body[0].lower() == "vinyldealbot" \
                     and not comment_has_been_read(cursor, username, permalink, created) \
@@ -140,6 +138,7 @@ def readPost(conn, cursor, reddit, subreddit, submission):
                 mark_comment_read(conn, cursor, username, permalink, created)
                 executeCommand(conn, cursor, comment, body)
     return numComments
+
 def readPosts(conn, cursor, reddit, subreddit):
     start = datetime.datetime.now()
     numComments = 0
