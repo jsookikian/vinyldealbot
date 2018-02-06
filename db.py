@@ -147,7 +147,7 @@ def get_artist_timestamp(conn, cursor, username, artist):
         )
         row = results.fetchone()
         if row is None:
-            return datetime.datetime.now().timestamp()
+            return 0
         else:
             row[0]
 
