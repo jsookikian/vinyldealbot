@@ -88,7 +88,7 @@ def addArtists(conn, cursor, comment):
             addedArtists.append(artist)
             logging.info(comment.author.name + " wants alerts for " + artist)
 
-        if not artist_is_active(conn, cursor, username, artist) \
+        elif not artist_is_active(conn, cursor, username, artist) \
                 and created > get_artist_timestamp(conn, cursor, username, artist):
             update_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
@@ -122,7 +122,9 @@ def readPost(conn, cursor, reddit, subreddit, submission):
     submission.comment_sort = 'new'
     for comment in submission.comments.list():
         numComments += 1
-        if not isinstance(comment, praw.models.MoreComments) and comment.body != "[deleted]" and comment.author is not None:
+        if not isinstance(comment, praw.models.MoreComments) \
+                and comment.body != "[deleted]" \
+                and comment.author is not None:
             username = comment.author.name
             permalink = comment.permalink
             created = comment.created_utc
