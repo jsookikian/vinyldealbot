@@ -108,7 +108,7 @@ def executeCommand(conn, cursor, comment, body):
         removeAllArtists(conn, cursor, comment)
         logging.info("Remove All Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
-    elif body[1].lower() == "removeall":
+    elif body[1].lower() == "showalerts":
         begin_execute = datetime.datetime.now()
         showAlerts(conn, cursor, comment)
         logging.info("Show Alerts...time taken:\t" + str(datetime.datetime.now() - begin_execute))
