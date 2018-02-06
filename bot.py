@@ -88,7 +88,7 @@ def addArtists(conn, cursor, comment):
             addedArtists.append(artist)
             logging.info(comment.author.name + " wants alerts for " + artist)
 
-        elif not artist_is_active(conn, cursor, username, artist) \
+        elif not artist_is_active(conn, cursor, username, artist) and artist != " " and len(artist)>1 \
                 and created > get_artist_timestamp(conn, cursor, username, artist):
             update_artist(conn, cursor, username, artist, created)
             addedArtists.append(artist)
