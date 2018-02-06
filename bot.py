@@ -99,18 +99,16 @@ def addArtists(conn, cursor, comment):
         time.sleep(3)
 
 def executeCommand(conn, cursor, comment, body):
-    if re.search("Remove ", comment.body, re.IGNORECASE) \
-            and body[1].lower() == "remove":
+    if body[1].lower() == "remove":
         begin_execute = datetime.datetime.now()
         removeArtists(conn, cursor, comment)
         logging.info("Remove Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
-    elif re.search("RemoveAll", comment.body, re.IGNORECASE) \
-            and body[1].lower() == "removeall":
+    elif body[1].lower() == "removeall":
         begin_execute = datetime.datetime.now()
         removeAllArtists(conn, cursor, comment)
         logging.info("Remove All Artists...time taken:\t" + str(datetime.datetime.now() - begin_execute))
 
-    elif re.search("ShowAlerts", comment.body, re.IGNORECASE):
+    elif body[1].lower() == "removeall":
         begin_execute = datetime.datetime.now()
         showAlerts(conn, cursor, comment)
         logging.info("Show Alerts...time taken:\t" + str(datetime.datetime.now() - begin_execute))
@@ -130,8 +128,7 @@ def readPost(conn, cursor, reddit, subreddit, submission):
             created = comment.created_utc
             body = comment.body.split(" ")
 
-            if re.search("vinyldealbot", comment.body.lower(), re.IGNORECASE) \
-                    and body[0].lower() == "vinyldealbot" \
+            if body[0].lower() == "vinyldealbot" \
                     and not comment_has_been_read(cursor, username, permalink, created) \
                     and comment.author.name != "VinylDealBot" \
                     and len(body) > 1:
