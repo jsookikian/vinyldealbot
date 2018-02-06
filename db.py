@@ -126,8 +126,6 @@ def artist_is_active(conn, cursor, username, artist):
                 ''', (username, artist)
         )
         row = results.fetchone()
-        if row is None:
-            return False
         if row[0] == 1:
             return True
         else:
@@ -195,8 +193,6 @@ def user_has_artist(cursor, username, artist):
             ''', (username,artist)
     )
     row = results.fetchone()
-    if row is None:
-        return False
     if row[0] >= 1:
         return True
     else:
