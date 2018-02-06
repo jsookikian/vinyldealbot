@@ -1,5 +1,6 @@
 import sqlite3
 import datetime
+import time
 conn =  sqlite3.connect('alerts.db')
 c = conn.cursor()
 
@@ -146,10 +147,8 @@ def get_artist_timestamp(conn, cursor, username, artist):
                 ''', (username, artist)
         )
         row = results.fetchone()
-        if row is None:
-            return 0
-        else:
-            row[0]
+
+        return row[0]
 
 
 def get_user_artists(cursor, username):
@@ -187,6 +186,7 @@ def get_users(cursor):
 
 def user_has_artist(cursor, username, artist):
     results = cursor.execute('''
+
         SELECT count(*) FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
