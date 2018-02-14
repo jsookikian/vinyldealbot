@@ -268,46 +268,46 @@ def update_tables(conn, cursor):
     # ''')
     # cursor.execute('DROP TABLE CommentRead')
 
-    cursor.execute('''
-        ALTER TABLE Artist
-        RENAME TO ArtistOld
-    ''')
-
-    cursor.execute('''
-        CREATE TABLE ArtistEntry (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name varchar(250) NOT NULL
-        )
-    ''')
-
-    cursor.execute('''
-        INSERT INTO ArtistEntry(name) SELECT distinct name from ArtistOld order by name
-    ''')
-
-
-    cursor.execute('''
-        CREATE TABLE Artist (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            artistEntry_id INT(11),
-            created TIMESTAMP NOT NULL,
-            active INTEGER NOT NULL,
-            CONSTRAINT FKArtistXArtistEntry_artistEntryId FOREIGN KEY (artistEntry_id) REFERENCES ArtistEntry(id)
-            )
-    ''')
-
-    cursor.execute('''
-    INSERT INTO Artist(id, artistEntry_id, created, active)
-    SELECT ArtistOld.id, ArtistEntry.id, created, active from ArtistOld
-    join ArtistEntry ON ArtistOld.name  = ArtistEntry.name
-    ''')
-
-    cursor.execute('''
-    DROP TABLE ArtistOld
-    ''')
-
-
-
-    conn.commit()
+    # cursor.execute('''
+    #     ALTER TABLE Artist
+    #     RENAME TO ArtistOld
+    # ''')
+    #
+    # cursor.execute('''
+    #     CREATE TABLE ArtistEntry (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         name varchar(250) NOT NULL
+    #     )
+    # ''')
+    #
+    # cursor.execute('''
+    #     INSERT INTO ArtistEntry(name) SELECT distinct name from ArtistOld order by name
+    # ''')
+    #
+    #
+    # cursor.execute('''
+    #     CREATE TABLE Artist (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         artistEntry_id INT(11),
+    #         created TIMESTAMP NOT NULL,
+    #         active INTEGER NOT NULL,
+    #         CONSTRAINT FKArtistXArtistEntry_artistEntryId FOREIGN KEY (artistEntry_id) REFERENCES ArtistEntry(id)
+    #         )
+    # ''')
+    #
+    # cursor.execute('''
+    # INSERT INTO Artist(id, artistEntry_id, created, active)
+    # SELECT ArtistOld.id, ArtistEntry.id, created, active from ArtistOld
+    # join ArtistEntry ON ArtistOld.name  = ArtistEntry.name
+    # ''')
+    #
+    # cursor.execute('''
+    # DROP TABLE ArtistOld
+    # ''')
+    #
+    #
+    #
+    # conn.commit()
 
     # cursor.execute('''
     #     INSERT INTO Artist(id, alertEntry_id) (SELECT distinct name from ArtistOld order by name)
@@ -355,4 +355,4 @@ def update_tables(conn, cursor):
 # init_tables(c)
 # create_test_data(conn, c)
 # test_remove(conn, c)
-update_tables(conn, c)
+# update_tables(conn, c)
