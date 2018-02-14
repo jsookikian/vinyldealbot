@@ -114,7 +114,7 @@ def artist_exists(cursor, artist):
 def get_artist_entry_id(cursor, artist):
     if artist_exists(cursor, artist):
         results = cursor.execute('''
-            SELECT ArtistEntry.id FROM Artist
+            SELECT ArtistEntry.id FROM ArtistEntry
             WHERE ArtistEntry.name = ?
                 ''' ,(artist,))
         rows = cursor.fetchone()
