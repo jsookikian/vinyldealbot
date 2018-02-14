@@ -52,7 +52,7 @@ def init_tables(cursor):
 def remove_artist_alert(conn, cursor, username, artist, created):
     if user_exists(cursor, username) and user_has_artist(cursor, username, artist):
         userid = get_user_id(cursor, username)
-        artistid =get_artist_id(cursor, username, artist)
+        artistid = get_artist_id(cursor, username, artist)
         results = cursor.execute("Update ARTIST SET Active=0, created= ? WHERE id=?", (created, artistid,))
         conn.commit()
 
@@ -92,7 +92,8 @@ def get_artist_id(cursor, username, artist):
             SELECT Artist.id FROM User
                 JOIN  UserXArtist ON User.id = user_id
                 JOIN Artist ON Artist.id = artist_id
-                WHERE Artist.name = ?
+                JOIN ArtistEntry on Artist.artistEntry_id = ArtistEntry.id
+                WHERE ArtistEntry.name = ?
                 AND User.name = ?''' ,(artist, username))
         rows = cursor.fetchone()
         artistid = rows[0]
@@ -104,10 +105,12 @@ def insert_artist(conn, cursor, username, artist, created):
         return -1
     userid = get_user_id(cursor, username)
     if user_has_artist(cursor, username, artist) :
-        artistid =get_artist_id(cursor, username, artist)
+        artistid = get_artist_id(cursor, username, artist)
         results = cursor.execute("Update ARTIST SET Active=1, created= ? WHERE id=?", (created, artistid,))
     elif artist != " " and artist != "":
-        results = cursor.execute("INSERT INTO Artist(name, created, active) VALUES(?, ?, ?)", (artist, created, 1))
+        results = cursor.execute("INSERT INTO ArtistEntry(name) VALUES (?)", [artist])
+        artistEntryId = cursor.lastrowid
+        results = cursor.execute("INSERT INTO Artist(artistEntry_id, created, active) VALUES(?, ?, ?)", (artistEntryId, created, 1))
         artistid = cursor.lastrowid
         results = cursor.execute("INSERT INTO UserXArtist(user_id, artist_id) VALUES(?, ?)", (userid, artistid))
     conn.commit()
@@ -121,8 +124,9 @@ def artist_is_active(conn, cursor, username, artist):
             SELECT active FROM Artist
                 JOIN  UserXArtist ON artist_id = Artist.id
                 JOIN User ON user_id = User.id
+                JOIN ArtistEntry on Artist.artistEntry_id = ArtistEntry.id
                 WHERE User.name = ?
-                AND Artist.name = ?
+                AND ArtistEntry.name = ?
                 ''', (username, artist)
         )
         row = results.fetchone()
@@ -142,8 +146,9 @@ def get_artist_timestamp(conn, cursor, username, artist):
             SELECT created FROM Artist
                 JOIN  UserXArtist ON artist_id = Artist.id
                 JOIN User ON user_id = User.id
+                JOIN ArtistEntry on Artist.artistEntry_id = ArtistEntry.id
                 WHERE User.name = ?
-                AND Artist.name = ?
+                AND ArtistEntry.name = ?
                 ''', (username, artist)
         )
         row = results.fetchone()
@@ -156,9 +161,10 @@ def get_user_artists(cursor, username):
         return -1
     userid = get_user_id(cursor, username)
     results = cursor.execute('''
-        SELECT Artist.name, Artist.created FROM Artist
+        SELECT ArtistEntry.name, Artist.created FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
+            JOIN ArtistEntry on Artist.artistEntry_id = ArtistEntry.id
             WHERE User.name = ? AND Artist.active=1''' ,(username,))
 
     rows = cursor.fetchall()
@@ -169,13 +175,14 @@ def get_all_users_with_artist(cursor, artist):
         SELECT DISTINCT User.name FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
-            WHERE Artist.name = ? AND Artist.active=1''' ,(artist,))
+            JOIN ArtistEntry on Artist.artistEntry_id = ArtistEntry.id
+            WHERE ArtistEntry.name = ? AND Artist.active=1''' ,(artist,))
 
     rows = cursor.fetchall()
     return [user[0] for user in rows]
 
 def get_all_artists(cursor):
-    results = cursor.execute('SELECT DISTINCT Artist.name FROM Artist')
+    results = cursor.execute('SELECT DISTINCT name FROM ArtistEntry')
     rows = cursor.fetchall()
     return [artist[0] for artist in rows]
 
@@ -190,8 +197,9 @@ def user_has_artist(cursor, username, artist):
         SELECT count(*) FROM Artist
             JOIN  UserXArtist ON artist_id = Artist.id
             JOIN User ON user_id = User.id
+            JOIN ArtistEntry ON Artist.artistEntry_id = ArtistEntry.id
             WHERE User.name = ?
-            AND Artist.name = ?
+            AND ArtistEntry.name = ?
             ''', (username,artist)
     )
     row = results.fetchone()
@@ -259,16 +267,52 @@ def update_tables(conn, cursor):
     #         )
     # ''')
     # cursor.execute('DROP TABLE CommentRead')
+
+    cursor.execute('''
+        ALTER TABLE Artist
+        RENAME TO ArtistOld
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE ArtistEntry (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name varchar(250) NOT NULL
+        )
+    ''')
+
+    cursor.execute('''
+        INSERT INTO ArtistEntry(name) SELECT distinct name from ArtistOld order by name
+    ''')
+
+
+    cursor.execute('''
+        CREATE TABLE Artist (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            artistEntry_id INT(11),
+            created TIMESTAMP NOT NULL,
+            active INTEGER NOT NULL,
+            CONSTRAINT FKArtistXArtistEntry_artistEntryId FOREIGN KEY (artistEntry_id) REFERENCES ArtistEntry(id)
+            )
+    ''')
+
+    cursor.execute('''
+    INSERT INTO Artist(id, artistEntry_id, created, active)
+    SELECT ArtistOld.id, ArtistEntry.id, created, active from ArtistOld
+    join ArtistEntry ON ArtistOld.name  = ArtistEntry.name
+    ''')
+
+    cursor.execute('''
+    DROP TABLE ArtistOld
+    ''')
+
+
+
+    conn.commit()
+
     # cursor.execute('''
-    #      CREATE TABLE CommentRead (
-    #          id INTEGER PRIMARY KEY AUTOINCREMENT,
-    #          username varchar(100) NOT NULL,
-    #          url varchar(400) NOT NULL,
-    #          created TIMESTAMP NOT NULL
-    #          )
-    #  ''')
-    # conn.commit()
-    pass
+    #     INSERT INTO Artist(id, alertEntry_id) (SELECT distinct name from ArtistOld order by name)
+    # ''').commit()
+    # pass
 
 # def create_test_data(conn, cursor):
 #     users = ["jsook724"]
@@ -311,4 +355,4 @@ def update_tables(conn, cursor):
 # init_tables(c)
 # create_test_data(conn, c)
 # test_remove(conn, c)
-# update_tables(conn, c)
+update_tables(conn, c)
