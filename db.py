@@ -99,17 +99,43 @@ def get_artist_id(cursor, username, artist):
         artistid = rows[0]
         return artistid
 
+def artist_exists(cursor, artist):
+    results = cursor.execute('''
+        SELECT count(*) FROM ArtistEntry
+            WHERE ArtistEntry.name = ?
+            ''', (artist,)
+    )
+    row = results.fetchone()
+    if row[0] >= 1:
+        return True
+    else:
+        return False
+
+def get_artist_entry_id(cursor, artist):
+    if artist_exists(cursor, artist):
+        results = cursor.execute('''
+            SELECT ArtistEntry.id FROM Artist
+            WHERE ArtistEntry.name = ?
+                ''' ,(artist,))
+        rows = cursor.fetchone()
+        artistEntryid = rows[0]
+        return artistEntryid
+
 
 def insert_artist(conn, cursor, username, artist, created):
     if (not user_exists(cursor, username)) or len(artist) < 2:
         return -1
     userid = get_user_id(cursor, username)
-    if user_has_artist(cursor, username, artist) :
+    if user_has_artist(cursor, username, artist):
         artistid = get_artist_id(cursor, username, artist)
         results = cursor.execute("Update ARTIST SET Active=1, created= ? WHERE id=?", (created, artistid,))
     elif artist != " " and artist != "":
-        results = cursor.execute("INSERT INTO ArtistEntry(name) VALUES (?)", [artist])
-        artistEntryId = cursor.lastrowid
+        artistEntryId = -1
+        if not artist_exists(cursor, artist):
+            results = cursor.execute("INSERT INTO ArtistEntry(name) VALUES (?)", [artist])
+            artistEntryId = cursor.lastrowid
+        else:
+            artistEntryId = get_artist_entry_id(cursor, artist)
         results = cursor.execute("INSERT INTO Artist(artistEntry_id, created, active) VALUES(?, ?, ?)", (artistEntryId, created, 1))
         artistid = cursor.lastrowid
         results = cursor.execute("INSERT INTO UserXArtist(user_id, artist_id) VALUES(?, ?)", (userid, artistid))
