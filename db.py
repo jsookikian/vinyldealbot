@@ -308,7 +308,7 @@ def update_tables(conn, cursor):
     #
     #
     # conn.commit()
-
+    pass
     # cursor.execute('''
     #     INSERT INTO Artist(id, alertEntry_id) (SELECT distinct name from ArtistOld order by name)
     # ''').commit()
