@@ -1,33 +1,33 @@
 def getCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n "
+    comment = "**VinylDealBot**\n\nYou will now receive messages when the following go on sale:\n\n"
     for artist in artists:
         comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
+    comment += "To get alerts, comment ```VinylDealBot Artist```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove Artist```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getRemoveArtistsCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
+    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n"
     for artist in artists:
         comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
+    comment += "To get alerts, comment ```VinylDealBot Artist```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove Artist]```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getRemovedAllCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n "
+    comment = "**VinylDealBot**\n\nYou will no longer receive messages for the following:\n\n"
     for artist in artists:
         comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
+    comment += "To get alerts, comment ```VinylDealBot Artist```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove Artist```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def getShowAllCommentString(artists):
-    comment = "**VinylDealBot**\n\nYou are currently signed up for alerts on the following:\n\n "
+    comment = "**VinylDealBot**\n\nYou are currently signed up for alerts on the following:\n\n"
     for artist,created in artists:
         comment +=  artist + "\n\n"
-    comment += "To get alerts, comment ```VinylDealBot [Artist | Album ] ```\n\n"
-    comment += "To remove alerts, comment ```VinylDealBot Remove [Artist | Album]```\n\nSeparate multiple artists/albums with semicolons(;)"
+    comment += "To get alerts, comment ```VinylDealBot Artist```\n\n"
+    comment += "To remove alerts, comment ```VinylDealBot Remove Artist```\n\nSeparate multiple artists/albums with semicolons(;)"
     return comment
 
 def get_template(artist, title, url, permalink):

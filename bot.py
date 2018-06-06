@@ -120,7 +120,7 @@ def executeCommand(conn, cursor, comment, body):
 def readPost(conn, cursor, reddit, subreddit, submission):
     numComments = 0
     submission.comment_sort = 'new'
-    submission.comments.replace_more(limit=None)
+
     for comment in submission.comments.list():
         numComments += 1
         if not isinstance(comment, praw.models.MoreComments) \
