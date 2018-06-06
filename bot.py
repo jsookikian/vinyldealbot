@@ -27,11 +27,11 @@ def removeAllArtists(conn, cursor, comment):
             removedArtists.append(artist)
     if len(removedArtists) > 0:
         logging.info("Removed all alerts for user " + username)
-        comment.reply(getRemovedAllCommentString(removedArtists))
+        # comment.reply(getRemovedAllCommentString(removedArtists))
         time.sleep(3)
     else:
         reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-        comment.reply(reply)
+        # comment.reply(reply)
 
 
 def showAlerts(conn, cursor, comment):
@@ -43,10 +43,10 @@ def showAlerts(conn, cursor, comment):
         mark_comment_read(conn, cursor, username, permalink, created)
         if artists == -1 or len(artists) <= 0:
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
-            comment.reply(reply)
+            # comment.reply(reply)
         else:
             logging.info("Showing all alerts for user " + username)
-            comment.reply(getShowAllCommentString(artists))
+            # comment.reply(getShowAllCommentString(artists))
             time.sleep(3)
 
 def removeArtists(conn, cursor, comment):
@@ -63,7 +63,7 @@ def removeArtists(conn, cursor, comment):
             removedArtists.append(artist)
             logging.info("Removed " + artist + " from user " + username)
     if len(removedArtists) > 0:
-        comment.reply(getRemoveArtistsCommentString(removedArtists))
+        # comment.reply(getRemoveArtistsCommentString(removedArtists))
         time.sleep(3)
 
 
@@ -95,7 +95,7 @@ def addArtists(conn, cursor, comment):
             logging.info(comment.author.name + " wants alerts for " + artist + " (update)")
 
     if (len(addedArtists) > 0):
-        comment.reply(getCommentString(addedArtists))
+        # comment.reply(getCommentString(addedArtists))
         time.sleep(3)
 
 def executeCommand(conn, cursor, comment, body):
@@ -120,6 +120,7 @@ def executeCommand(conn, cursor, comment, body):
 def readPost(conn, cursor, reddit, subreddit, submission):
     numComments = 0
     submission.comment_sort = 'new'
+    submission.comments.replace_more(limit=None)
     for comment in submission.comments.list():
         numComments += 1
         if not isinstance(comment, praw.models.MoreComments) \
@@ -134,8 +135,8 @@ def readPost(conn, cursor, reddit, subreddit, submission):
                     and not comment_has_been_read(cursor, username, permalink, created) \
                     and comment.author.name != "VinylDealBot" \
                     and len(body) > 1:
-                mark_comment_read(conn, cursor, username, permalink, created)
                 executeCommand(conn, cursor, comment, body)
+                mark_comment_read(conn, cursor, username, permalink, created)
     return numComments
 
 def readPosts(conn, cursor, reddit, subreddit):
