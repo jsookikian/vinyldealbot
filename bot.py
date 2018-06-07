@@ -40,6 +40,7 @@ def showAlerts(conn, cursor, comment):
     permalink = comment.permalink
     if user_exists(cursor, username):
         artists = get_user_artists(cursor, username)
+        artists.sort()
         mark_comment_read(conn, cursor, username, permalink, created)
         if artists == -1 or len(artists) <= 0:
             reply = "**VinylDealBot**\n\nYou are currently not signed up for any alerts\n\n"
