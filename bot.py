@@ -159,9 +159,11 @@ def send_alert(conn, cursor, reddit, submission, artist, username):
     logging.info("Sent message to " + username + " for " + artist + "\n" + submission.title)
 
 def titleContainsArtist(artist, title):
-    cases = [artist + " ", artist + ";", artist + ":", artist + ";", artist + ","]
-    for case in cases:
-        if title.find(case) > 0:
+    title = re.split("[^{a-z}]+", title)
+    artist = re.split("\s", artist)
+    length = len(artist)
+    for i in range(len(title) - length + 1):
+        if title[i:i + length] == artist:
             return True
     return False
 
